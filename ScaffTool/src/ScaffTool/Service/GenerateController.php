@@ -64,6 +64,8 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= '{';
 		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(1)."public \$".$this->modelName."Table;";
+		$code .= $this->makeLine(1);
 
 		$code .= $this->makeTab(1).'public function indexAction()';
 		$code .= $this->makeLine(1);
@@ -71,7 +73,7 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2).'return new ViewModel(array(';
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."'".$this->modelName."s' => \$this->getTable('".$this->tableName."')->fetchAll(),";
+		$code .= $this->makeTab(3)."'".strtolower($this->modelName)."s' => \$this->getTable()->fetchAll(),";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2).'));';
 		$code .= $this->makeLine(1);
@@ -95,6 +97,23 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeTab(1).'public function deleteAction()';
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'{';
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(1).'}';
+		$code .= $this->makeLine(2);
+
+		$code .= $this->makeTab(1).'public function getTable()';
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(1).'{';
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."if (!\$this->".$this->modelName."Table) {";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(3)."\$sm = \$this->getServiceLocator();";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(3)."\$this->".$this->modelName."Table = \$sm->get('".$this->moduleName."\\Model\\".$this->modelName."Table');";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."}";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."return \$this->".$this->modelName."Table;";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'}';
 		$code .= $this->makeLine(2);

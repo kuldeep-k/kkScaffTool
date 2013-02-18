@@ -36,7 +36,7 @@ class GenerateModel extends AbstractGenerateService
 		}
 
 		// Add Model
-/*		$modelName = ucfirst($this->modelName);
+		$modelName = ucfirst($this->modelName);
 		$modelPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Model/'.$modelName.'.php';
 
 		if(!file_exists(dirname($modelPath)))
@@ -53,11 +53,11 @@ class GenerateModel extends AbstractGenerateService
         }
 
 		$code = $this->getModelCode();
-		echo $modelPath;
+		//echo $modelPath;
 		touch($modelPath);
 
 		file_put_contents($modelPath, $code);
-*/
+
 
 		// Add Model Table
 		$modelName = ucfirst($this->modelName).'Table';
@@ -110,6 +110,8 @@ class GenerateModel extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= 'use Zend\Db\TableGateway\AbstractTableGateway;';
 		$code .= $this->makeLine(1);
+		//$code .= 'use '.$this->moduleName.'\\Model\\'.$this->uModelName.';';
+		//$code .= $this->makeLine(1);
 		
 		$code .= $this->makeLine(1);
 

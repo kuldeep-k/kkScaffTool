@@ -21,6 +21,8 @@ Release Version 1.0
 
 V1.1
     Update Config/Module.php during scaffold instead of instruct to user.
+    Listing Pagination/Sort
+    Listing Search
 
 
 

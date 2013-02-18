@@ -71,6 +71,9 @@ class Module
 				'ScaffTool\Service\GenerateModel'	=> function($sm) {
 					return new Service\GenerateModel;
 				},
+				'ScaffTool\Service\GenerateView'	=> function($sm) {
+					return new Service\GenerateView;
+				},
 				'ScaffTool\Model\ScaffToolTable' =>  function($sm) {
                     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
                     $table = new Model\ScaffToolTable($dbAdapter);

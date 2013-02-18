@@ -34,244 +34,89 @@ class GenerateView extends AbstractGenerateService
 			throw new \Exception('Module Path `'.$modulePath.'` is not writable.');
 		}
 
-		// Add Model
-/*		$modelName = ucfirst($this->modelName);
-		$modelPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Model/'.$modelName.'.php';
+		// Add Listing index view
+		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/index.phtml';
 
-		if(!file_exists(dirname($modelPath)))
+		if(!file_exists(dirname($viewPath)))
         {
-            throw new \Exception('Model `'.dirname($modelPath).'` not exists ');
+			mkdir(dirname($viewPath));
+            //throw new \Exception('Path `'.dirname($viewPath).'` not exists ');
         }
-        if(!is_writable(dirname($modelPath)))
+        if(!is_writable(dirname($viewPath)))
         {
-            throw new \Exception('Path `'.dirname($modelPath).'` is not writable.');
+            throw new \Exception('Path `'.dirname($viewPath).'` is not writable.');
         }
-		if(file_exists($modelPath))
+		if(file_exists($viewPath))
         {
-            throw new \Exception('Model `'.$modelName.'` already exists ');
-        }
-
-		$code = $this->getModelCode();
-		echo $modelPath;
-		touch($modelPath);
-
-		file_put_contents($modelPath, $code);
-*/
-
-		// Add Model Table
-		$modelName = ucfirst($this->modelName).'Table';
-		$modelPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Model/'.$modelName.'.php';
-
-		if(!file_exists(dirname($modelPath)))
-        {
-            throw new \Exception('Model `'.dirname($modelPath).'` not exists ');
-        }
-        if(!is_writable(dirname($modelPath)))
-        {
-            throw new \Exception('Path `'.dirname($modelPath).'` is not writable.');
-        }
-		if(file_exists($modelPath))
-        {
-            throw new \Exception('Model `'.$modelName.'` already exists ');
+            throw new \Exception('View `'.$viewPath.'` already exists ');
         }
 
-		$code = $this->getModelTableCode();
+		$code = $this->getIndexViewCode();
 
-		touch($modelPath);
+		touch($viewPath);
 
-		file_put_contents($modelPath, $code);
+		file_put_contents($viewPath, $code);
 	}
 
-	public function getModelTableCode()
+	public function getIndexViewCode()
 	{
 		$modelName = $this->uModelName;
+		$lModelName = strtolower($this->modelName);
 
-		$code = '<?php ';
-		$code .= $this->makeLine(2);
-		$code .= 'namespace '.$this->uModuleName.'\\Model;';
-		$code .= $this->makeLine(2);
-
-		$code .= 'use Zend\Db\Sql\Sql;';
+		$code = "<?php \$this->headTitle('My ".$modelName."s'); ?>";
 		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\Sql\Where;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\Sql\Predicate;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\Sql\Expression;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\Sql\Statement;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\Sql\Select;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\Adapter\Adapter;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\ResultSet\ResultSet;';
-		$code .= $this->makeLine(1);
-		$code .= 'use Zend\Db\TableGateway\AbstractTableGateway;';
-		$code .= $this->makeLine(1);
-		
+		$code .= "<h1><?php echo \$this->escapeHtml('My ".$modelName."s'); ?></h1>";
 		$code .= $this->makeLine(1);
 
-		$code .= 'class '.$this->uModelName.'Table extends AbstractTableGateway';
+		$code .= "<p><a href=\"<?php echo \$this->url('".$lModelName."', array('action'=>'add'));?>\">Add new ".$modelName."</a></p>";
 		$code .= $this->makeLine(1);
-		$code .= '{';
+		$code .= "<table class=\"table\">";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1)."protected \$table ='".$this->tableName."';";		
-		$code .= $this->makeLine(1);
-	
-		$code .= $this->makeTab(1)."public function __construct(Adapter \$adapter)";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$this->adapter = \$adapter;";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$this->resultSetPrototype = new ResultSet();";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$this->resultSetPrototype->setArrayObjectPrototype(new ".$this->uModelName."());";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$this->initialize();";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
-
-		$code .= $this->makeTab(1)."public function fetchAll()";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$resultSet = \$this->select();";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."return \$resultSet;";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
-
-		$code .= $this->makeTab(1)."public function get".$this->uModelName."(\$id)";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$id  = (int) \$id;";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$rowset = \$this->select(array('".$this->primaryKeyColumn."' => \$id));";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$row = \$rowset->current();";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."if (!\$row) {";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."throw new \\Exception(\"Could not find row \$id\");";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."}";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."return \$row;";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
-
-		$code .= $this->makeTab(1)."public function save".$this->uModelName."(".$this->uModelName." \$".$this->modelName.")";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$data = array(";
+		$code .= '<tr>';
 		$code .= $this->makeLine(1);
 		foreach($this->tableStructure as $fieldName => $fieldStructure)
 		{
-			$code .= $this->makeTab(3)."'".$fieldName."' => \$".$this->modelName."->".$fieldName.",";		
+			$code .= "<td>".$this->convertToLabel($fieldName)."</td>";
 			$code .= $this->makeLine(1);
 		}
-		$code .= $this->makeTab(2).");";
+		$code .= '</tr>';
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$id = (int)\$".$this->modelName."->".$this->primaryKeyColumn.";";
+		$code .= "<?php foreach(\$".$lModelName."s as \$".$lModelName.") : ?>";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."if (\$id == 0) {";
+		$code .= "<tr style=\"background-color:<?php echo \$this->cycle(array('#F0F0F0','#FFFFFF'))->next() ?>\" >";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."\$this->insert(\$data);";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."} else {";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."if (\$this->get".$this->uModelName."(\$id)) {";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(4)."\$this->update(\$data, array('".$this->primaryKeyColumn."' => \$id));";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."} else {";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(4)."throw new \Exception('".$this->uModelName." id does not exist');";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3).'}';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2).'}';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
 
-		$code .= $this->makeTab(1)."public function delete".$this->uModelName."(\$id)";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$this->delete(array('".$this->primaryKeyColumn."' => \$id));";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
 
-		$code .= '}';
+		foreach($this->tableStructure as $fieldName => $fieldStructure)
+		{
+			//$code .= $this->makeTab(3)."'".$fieldName."' => \$".$this->modelName."->".$fieldName.",";		
+			//$code .= $this->makeLine(1);
+			$code .= "<td><?php echo \$this->escapeHtml(\$".$lModelName."->".$fieldName.");?></td>";
+			$code .= $this->makeLine(1);
+		}
+
+		/*$code .= "<td><?php echo \$this->escapeHtml(\$".$lModelName."->title);?></td>";
+		$code .= $this->makeLine(1);
+		$code .= "<td><?php echo \$this->escapeHtml(\$".$lModelName."->artist);?></td>";
+		$code .= $this->makeLine(1);*/
+		$code .= "<td><a href=\"<?php echo \$this->url('".$lModelName."',array('action'=>'edit', 'id' => \$".$lModelName."->".$this->primaryKeyColumn."));?>\">Edit</a>";
+		
+		$code .= $this->makeLine(1);
+		$code .= "<a href=\"<?php echo \$this->url('".$lModelName."',array('action'=>'delete', 'id' => \$".$lModelName."->".$this->primaryKeyColumn."));?>\">Delete</a></td>";
+		$code .= $this->makeLine(1);
+		$code .= '</tr>';
+		$code .= $this->makeLine(1);
+		$code .= '<?php endforeach; ?>';
+		$code .= $this->makeLine(1);
+		$code .= '</table>';
 		$code .= $this->makeLine(1);
 		return $code;
 	}
 
-
-	public function getModelCode()
+	public function convertToLabel($text)
 	{
-		$modelName = $this->uModelName;
-
-		$code = '<?php ';
-		$code .= $this->makeLine(2);
-		$code .= 'namespace '.$this->uModuleName.'\\Model;';
-		$code .= $this->makeLine(2);
-
-		$code .= 'class '.$modelName;
-		$code .= $this->makeLine(1);
-		$code .= '{';
-		$code .= $this->makeLine(1);
-		
-		foreach($this->tableStructure as $fieldName => $fieldStructure)
-		{
-			$code .= $this->makeTab(1)."public \$".$fieldName.';';		
-			$code .= $this->makeLine(1);
-		}
-
-		$code .= $this->makeTab(1)."public function exchangeArray(\$data)";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-
-		foreach($this->tableStructure as $fieldName => $fieldStructure)
-		{
-			$code .= $this->makeTab(2)."\$this->".$fieldName." = (isset(\$data['".$fieldName."'])) ? \$data['".$fieldName."'] : null; ";
-			$code .= $this->makeLine(1);
-		}
-
-//$this->id     = (isset($data['id'])) ? $data['id'] : null;
-
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
-
-		$code .= $this->makeTab(1).'public function getArrayCopy()';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'{';
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."return get_object_vars(\$this);";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(1).'}';
-		$code .= $this->makeLine(2);
-
-		$code .= '}';
-		$code .= $this->makeLine(1);
-		return $code;
+		return ucwords(str_replace('_', ' ', $text));
 	}
-
-	public function getTableStructure()
-	{
-		
-	}
-
 }
 
 
