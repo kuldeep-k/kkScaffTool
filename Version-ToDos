@@ -1,0 +1,26 @@
+V0.1 
+    Generate Controller with indexAction
+    Generate Model and ModelTable 
+    Generate Index as Listing shown for all available column and rows
+    
+V0.2
+    Generate Simple Form for Add/Edit for all fields except primary key (auto incremented.) as text field
+    Generate Controller with addAction/editAction/deleteAction
+    Generate View with edit/add/delete links 
+    Generate View for edit/add + as text field
+V0.3
+    Control form/listing fields by configuration
+    Control field type by configuration (by dbtype default)
+V0.4
+    Templateing for views   
+    Add Unit Tests (?)
+    Add form validations
+
+Release Version 1.0 
+
+
+V1.1
+    Update Config/Module.php during scaffold instead of instruct to user.
+
+
+
