@@ -56,6 +56,19 @@ class GenerateView extends AbstractGenerateService
 		touch($viewPath);
 
 		file_put_contents($viewPath, $code);
+
+
+		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/add.phtml';
+		if(file_exists($viewPath))
+        {
+            throw new \Exception('View `'.$viewPath.'` already exists ');
+        }
+
+		$code = $this->getAddViewCode();
+
+		touch($viewPath);
+
+		file_put_contents($viewPath, $code);
 	}
 
 	public function getIndexViewCode()
@@ -113,10 +126,74 @@ class GenerateView extends AbstractGenerateService
 		return $code;
 	}
 
-	public function convertToLabel($text)
+	public function getAddViewCode()
 	{
-		return ucwords(str_replace('_', ' ', $text));
+		$modelName = $this->uModelName;
+		$lModelName = strtolower($this->modelName);
+
+		$code = "<?php \$this->headTitle('Add new ".$modelName."'); ?>";
+		$code .= $this->makeLine(1);
+		$code .= "<h1><?php echo \$this->escapeHtml('Add new ".$modelName."'); ?></h1>";
+		$code .= $this->makeLine(1);
+		$code .= "<?php";
+		$code .= $this->makeLine(1);
+		$code .= "\$form = \$this->form;";
+		$code .= $this->makeLine(1);
+		$code .= "\$form->setAttribute('action', \$this->url('".$lModelName."', array('action' => 'add')));";
+		$code .= $this->makeLine(1);
+		$code .= "\$form->prepare();";
+		$code .= $this->makeLine(1);
+
+		$code .= "echo \$this->form()->openTag(\$form);";
+		$code .= $this->makeLine(1);
+		$code .= "echo \$this->formHidden(\$form->get('".$this->primaryKeyColumn."'));";
+		$code .= $this->makeLine(1);
+		foreach($this->tableStructure as $fieldName => $fieldStructure)
+		{
+			$code .= "echo \$this->formRow(\$form->get('".$fieldName."'));";
+			$code .= $this->makeLine(1);
+		}
+		$code .= "echo \$this->formSubmit(\$form->get('submit'));";
+		$code .= $this->makeLine(1);
+		$code .= "echo \$this->form()->closeTag();";
+		$code .= $this->makeLine(1);
+		return $code;
 	}
+
+	public function getEditViewCode()
+	{
+		$modelName = $this->uModelName;
+		$lModelName = strtolower($this->modelName);
+
+		$code = "<?php \$this->headTitle('Edit ".$modelName."'); ?>";
+		$code .= $this->makeLine(1);
+		$code .= "<h1><?php echo \$this->escapeHtml('Edit ".$modelName."'); ?></h1>";
+		$code .= $this->makeLine(1);
+		$code .= "<?php";
+		$code .= $this->makeLine(1);
+		$code .= "\$form = \$this->form;";
+		$code .= $this->makeLine(1);
+		$code .= "\$form->setAttribute('action', \$this->url('".$lModelName."', array('action' => 'edit', '".$this->primaryKeyColumn."'     => \$this->".$this->primaryKeyColumn.")));";
+		$code .= $this->makeLine(1);
+		$code .= "\$form->prepare();";
+		$code .= $this->makeLine(1);
+
+		$code .= "echo \$this->form()->openTag(\$form);";
+		$code .= $this->makeLine(1);
+		$code .= "echo \$this->formHidden(\$form->get('".$this->primaryKeyColumn."'));";
+		$code .= $this->makeLine(1);
+		foreach($this->tableStructure as $fieldName => $fieldStructure)
+		{
+			$code .= "echo \$this->formRow(\$form->get('".$fieldName."'));";
+			$code .= $this->makeLine(1);
+		}
+		$code .= "echo \$this->formSubmit(\$form->get('submit'));";
+		$code .= $this->makeLine(1);
+		$code .= "echo \$this->form()->closeTag();";
+		$code .= $this->makeLine(1);
+		return $code;
+	}
+
 }
 
 

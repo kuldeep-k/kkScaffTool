@@ -270,11 +270,6 @@ class GenerateModel extends AbstractGenerateService
 		return $code;
 	}
 
-	public function getTableStructure()
-	{
-		
-	}
-
 }
 
 

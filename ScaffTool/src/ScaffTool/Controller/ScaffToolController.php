@@ -25,10 +25,11 @@ class ScaffToolController extends AbstractActionController
     	        throw new \RuntimeException('You can only use this action from a console!');
         	}
 
-			echo $tableName   = $request->getParam('tableName');
+			$tableName   = $request->getParam('tableName');
 			$modelName   = $request->getParam('modelName');
 			$moduleName   = $request->getParam('moduleName');
 
+			$this->showLoader();
 			$this->getServiceLocator()->get('ScaffTool\Model\ScaffToolTable')->verifyTable($tableName);
 
 			$controllerGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateController');
@@ -36,7 +37,7 @@ class ScaffToolController extends AbstractActionController
 			$controllerGenerator->setModel($modelName);
 			$controllerGenerator->setTable($tableName);
 			$controllerGenerator->generate();
-			
+			/*
 			$modelGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateModel');
 			$modelGenerator->setModule($moduleName);
 			$modelGenerator->setModel($modelName);
@@ -48,18 +49,31 @@ class ScaffToolController extends AbstractActionController
 			$viewGenerator->setModel($modelName);
 			$viewGenerator->setTable($tableName);
 			$viewGenerator->generate();
-/*
-			$controller_generator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateController');
-			$controllerGenerator->setModule($moduleName);
-			$controllerGenerator->setModel($modelName);
-			$controllerGenerator->generate();
-*/
+			*/
+			$formGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateForm');
+			$formGenerator->setModule($moduleName);
+			$formGenerator->setModel($modelName);
+			$formGenerator->setTable($tableName);
+			$formGenerator->generate();
+			$this->hideLoader();
+			
 			//$controllerGenerator->setModel($modelName);
-			print_r($response);
+			//print_r($response);
 		}
 		catch(\Exception $e)
 		{
+			$this->hideLoader();
 			return PHP_EOL.'Error : '.$e->getMessage().PHP_EOL;
 		}
+	}
+
+	public function showLoader()
+	{
+		//echo 'Doing.........';
+	}
+
+	public function hideLoader()
+	{
+		echo PHP_EOL;
 	}
 }

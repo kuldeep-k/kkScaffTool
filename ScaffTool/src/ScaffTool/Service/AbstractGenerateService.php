@@ -51,6 +51,10 @@ class AbstractGenerateService implements ServiceLocatorAwareInterface {
 		return str_repeat("\t", $numOfTabs);
 	}
 
+	public function convertToLabel($text)
+	{
+		return ucwords(str_replace('_', ' ', $text));
+	}
 }
 
 
