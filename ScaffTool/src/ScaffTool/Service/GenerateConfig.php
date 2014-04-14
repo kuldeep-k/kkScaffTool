@@ -4,7 +4,7 @@ namespace ScaffTool\Service;
 
 use ScaffTool\Service\AbstractGenerateService;
 
-class GenerateController extends AbstractGenerateService
+class GenerateConfig extends AbstractGenerateService
 {
 	public function generate()
 	{
@@ -20,42 +20,81 @@ class GenerateController extends AbstractGenerateService
 			throw new \Exception('Module Path `'.$modulePath.'` is not writable.');
 		}
 
-		$controllerName = ucfirst($this->modelName).'Controller';
-		$controllerPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Controller/'.$controllerName.'.php';
+        $configName = $this->modelName.'.config.php';
+		//$controllerName = ucfirst($this->modelName).'Controller';
+		$configPath = $modulePath.'/config/'.$configName;
 
-		if(!file_exists(dirname($controllerPath)))
+		if(!file_exists(dirname($configPath)))
         {
-            throw new \Exception('Controller `'.dirname($controllerPath).'` not exists ');
+            throw new \Exception('Path `'.dirname($configPath).'` not exists ');
         }
-        if(!is_writable(dirname($controllerPath)))
+        if(!is_writable(dirname($configPath)))
         {
-            throw new \Exception('Path `'.dirname($controllerPath).'` is not writable.');
+            throw new \Exception('Path `'.dirname($configPath).'` is not writable.');
         }
-		if(file_exists($controllerPath))
+		if(file_exists($configPath))
         {
-            throw new \Exception('Controller `'.$controllerName.'` already exists ');
+            throw new \Exception('Config `'.$configPath.'` already exists ');
         }
 
-		$code = $this->getCode();
+        $template = $this->getTemplate();
+        $template = str_replace(array('--CMODULE--', '--CMODEL--', '--MODEL--'), array($this->uModuleName, $this->uModelName, $this->modelName), $template);
+		//$code = $this->getCode();
 
-		touch($controllerPath);
+		touch($configPath);
 
-		file_put_contents($controllerPath, $code);
+		file_put_contents($configPath, $template);
 	}
 
+    public function getTemplate()
+    {
+        return $template = "<?php
+    return array(
+    'controllers' => array(
+        'invokables' => array(
+            '--CMODULE--\Controller\--CMODEL--' => '--CMODULE--\Controller\--CMODEL--Controller',
+        ),
+    ),
+
+    // The following section is new and should be added to your file
+    'router' => array(
+        'routes' => array(
+            '--MODEL--' => array(
+                'type'    => 'segment',
+                'options' => array(
+                    'route'    => '/--MODEL--[/:action][/:id]',
+                    'constraints' => array(
+                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                        'id'     => '[0-9]+',
+                    ),
+                    'defaults' => array(
+                        'controller' => '--CMODULE--\Controller\--CMODEL--',
+                        'action'     => 'index',
+                    ),
+                ),
+            ),
+        ),
+    ),
+);";
+    }
 	public function getCode()
 	{
 		$controllerName = $this->uModelName.'Controller';
 
 		$code = '<?php ';
 		$code .= $this->makeLine(2);
-		$code .= 'namespace '.$this->uModuleName.'\\Controller;';
+		$code .= 'return array(';
 		$code .= $this->makeLine(2);
-		$code .= 'use Zend\\Mvc\\Controller\\AbstractActionController;';
+		$code .= $this->makeTab(1)."'controllers' => array(";
 		$code .= $this->makeLine(1);
-		$code .= 'use Zend\\View\\Model\\ViewModel;';
+		$code .= $this->makeTab(2)."'invokables' => array(";
 		$code .= $this->makeLine(1);
-		$code .= 'use '.$this->uModuleName.'\\Model\\'.$this->uModelName.';';
+		$code .= $this->makeTab(3).$this->uModuleName."\\Controller\\".$this->uModuleName."' => '".$this->uModuleName."\\Controller\\".$this->uModuleName."Controller";
+		$code .= $this->makeTab(2)."),";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(1)."),";
+		$code .= $this->makeLine(1);
+
 		$code .= $this->makeLine(1);
 		$code .= 'use '.$this->uModuleName.'\\Form\\'.$this->uModelName.'Form;';
 		$code .= $this->makeLine(1);
@@ -121,27 +160,13 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'{';
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$id = (int) \$this->params()->fromRoute('id', 0);";
+		$code .= $this->makeTab(2)."\$id = (int) new ".$this->uModelName."Form();";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."if (!\$id) {";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."return \$this->redirect()->toRoute('".strtolower($this->modelName)."', array(";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(4)."'action' => 'add'";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."));";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."}";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$".strtolower($this->modelName)." = \$this->getTable()->get".$this->uModelName."(\$id);";
-		$code .= $this->makeLine(1);
-
-
 		$code .= $this->makeTab(2)."\$form = new ".$this->uModelName."Form();";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."\$form->bind(\$".strtolower($this->modelName).");";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$form->get('submit')->setAttribute('value', 'Edit');";
+		$code .= $this->makeTab(2)."\$form->get('submit')->setValue('Edit');";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."\$request = \$this->getRequest();";
 		$code .= $this->makeLine(1);
@@ -155,9 +180,9 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(3)."if (\$form->isValid()) {";
 		$code .= $this->makeLine(1);
-		//$code .= $this->makeTab(4)."\$".strtolower($this->modelName)."->exchangeArray(\$form->getData());";
-		//$code .= $this->makeLine(1);
-		$code .= $this->makeTab(4)."\$this->getTable()->save".$this->uModelName."(\$form->getData());";
+		$code .= $this->makeTab(4)."\$".strtolower($this->modelName)."->exchangeArray(\$form->getData());";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(4)."\$this->getTable()->save".$this->uModelName."(\$".strtolower($this->modelName).");";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(4)."\$this->flashMessenger()->addMessage('Thank you for your comment!');";
 		$code .= $this->makeLine(1);
@@ -166,8 +191,6 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeTab(3)."}";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."}";
-		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."return array('form' => \$form, 'id' => \$id);";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'}';
 		$code .= $this->makeLine(2);

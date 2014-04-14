@@ -27,9 +27,17 @@ class ScaffToolTable
 
     public function verifyTable($tableName)
     {
-		$metadata = new Metadata($this->adapter);	
-		$tableNames = $metadata->getTableNames();
-
+        try
+        {
+		    $metadata = new Metadata($this->adapter);	
+        
+		    $tableNames = $metadata->getTableNames();
+        }
+        catch(PDOException $e)
+        {
+            die('In');
+        }
+        //print_r($tableNames);die;
 		if(!in_array($tableName, $tableNames))
 		{
 			throw new \Exception("Table `".$tableName."` not exists ");

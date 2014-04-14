@@ -77,6 +77,9 @@ class Module
 				'ScaffTool\Service\GenerateForm'	=> function($sm) {
 					return new Service\GenerateForm;
 				},
+                'ScaffTool\Service\GenerateConfig'	=> function($sm) {
+					return new Service\GenerateConfig;
+				},
 				'ScaffTool\Model\ScaffToolTable' =>  function($sm) {
                     $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
                     $table = new Model\ScaffToolTable($dbAdapter);

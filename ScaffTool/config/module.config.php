@@ -42,6 +42,6 @@ return array(
             )
         )
     ),
-	'BASE_PATH' => '/var/www/zend2'
+	'BASE_PATH' => '/var/www/zfskel/ZendSkeletonApplication'
 );
 

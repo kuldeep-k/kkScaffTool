@@ -101,7 +101,7 @@ class GenerateForm extends AbstractGenerateService
 
 		$code .= $this->makeTab(2)."\$this->add(array(";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."'name' => 'vibe_id',";
+		$code .= $this->makeTab(3)."'name' => 'id',";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(3)."'attributes' => array(";
 		$code .= $this->makeLine(1);

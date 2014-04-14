@@ -16,13 +16,13 @@ class AbstractGenerateService implements ServiceLocatorAwareInterface {
 
 	public function setModel($modelName)
 	{
-		$this->modelName = $modelName;
+		$this->modelName = strtolower($modelName);
 		$this->uModelName = ucfirst($modelName);
 	}
 
 	public function setModule($moduleName)
 	{
-		$this->moduleName = $moduleName;
+		$this->moduleName = strtolower($moduleName);
 		$this->uModuleName = ucfirst($moduleName);
 	}
 

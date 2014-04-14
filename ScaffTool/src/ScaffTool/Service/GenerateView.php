@@ -57,7 +57,7 @@ class GenerateView extends AbstractGenerateService
 
 		file_put_contents($viewPath, $code);
 
-
+        // Add Listing add view
 		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/add.phtml';
 		if(file_exists($viewPath))
         {
@@ -69,6 +69,20 @@ class GenerateView extends AbstractGenerateService
 		touch($viewPath);
 
 		file_put_contents($viewPath, $code);
+
+        // Edit Listing add view
+		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/edit.phtml';
+		if(file_exists($viewPath))
+        {
+            throw new \Exception('View `'.$viewPath.'` already exists ');
+        }
+
+		$code = $this->getEditViewCode();
+
+		touch($viewPath);
+
+		file_put_contents($viewPath, $code);
+
 	}
 
 	public function getIndexViewCode()
@@ -148,12 +162,26 @@ class GenerateView extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= "echo \$this->formHidden(\$form->get('".$this->primaryKeyColumn."'));";
 		$code .= $this->makeLine(1);
+        $code .= "?>";
+		$code .= $this->makeLine(1);
 		foreach($this->tableStructure as $fieldName => $fieldStructure)
 		{
-			$code .= "echo \$this->formRow(\$form->get('".$fieldName."'));";
-			$code .= $this->makeLine(1);
+            if($fieldName != $this->primaryKeyColumn)
+            {
+                $code .= "<div class=\"row\">";
+			    //$code .= "echo \$this->formRow(\$form->get('".$fieldName."'));";
+                $code .= $this->makeLine(1);
+                $code .= $this->makeTab(1)."<?php echo \$this->formLabel(\$form->get('".$fieldName."')); ?>";
+                $code .= $this->makeLine(1);
+                $code .= $this->makeTab(1)."<?php echo \$this->formElement(\$form->get('".$fieldName."')); ?>";
+                $code .= $this->makeLine(1);
+                $code .= $this->makeTab(1)."<?php echo \$this->formElementErrors(\$form->get('".$fieldName."')); ?>";
+			    $code .= $this->makeLine(1);
+                $code .= "</div>";          
+                $code .= $this->makeLine(2);  
+            }
 		}
-		$code .= "echo \$this->formSubmit(\$form->get('submit'));";
+		$code .= "<?php echo \$this->formSubmit(\$form->get('submit'));";
 		$code .= $this->makeLine(1);
 		$code .= "echo \$this->form()->closeTag();";
 		$code .= $this->makeLine(1);
@@ -182,12 +210,26 @@ class GenerateView extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= "echo \$this->formHidden(\$form->get('".$this->primaryKeyColumn."'));";
 		$code .= $this->makeLine(1);
+        $code .= "?>";
+		$code .= $this->makeLine(1);
 		foreach($this->tableStructure as $fieldName => $fieldStructure)
 		{
-			$code .= "echo \$this->formRow(\$form->get('".$fieldName."'));";
-			$code .= $this->makeLine(1);
+            if($fieldName != $this->primaryKeyColumn)
+            {
+                $code .= "<div class=\"row\">";
+			    //$code .= "echo \$this->formRow(\$form->get('".$fieldName."'));";
+                $code .= $this->makeLine(1);
+                $code .= $this->makeTab(1)."<?php echo \$this->formLabel(\$form->get('".$fieldName."')); ?>";
+                $code .= $this->makeLine(1);
+                $code .= $this->makeTab(1)."<?php echo \$this->formElement(\$form->get('".$fieldName."')); ?>";
+                $code .= $this->makeLine(1);
+                $code .= $this->makeTab(1)."<?php echo \$this->formElementErrors(\$form->get('".$fieldName."')); ?>";
+			    $code .= $this->makeLine(1);
+                $code .= "</div>";          
+                $code .= $this->makeLine(2);  
+            }
 		}
-		$code .= "echo \$this->formSubmit(\$form->get('submit'));";
+		$code .= "<?php echo \$this->formSubmit(\$form->get('submit'));";
 		$code .= $this->makeLine(1);
 		$code .= "echo \$this->form()->closeTag();";
 		$code .= $this->makeLine(1);

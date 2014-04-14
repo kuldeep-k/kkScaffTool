@@ -30,14 +30,23 @@ class ScaffToolController extends AbstractActionController
 			$moduleName   = $request->getParam('moduleName');
 
 			$this->showLoader();
+            
 			$this->getServiceLocator()->get('ScaffTool\Model\ScaffToolTable')->verifyTable($tableName);
 
+            
+            $configGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateConfig');
+			$configGenerator->setModule($moduleName);
+			$configGenerator->setModel($modelName);
+			$configGenerator->setTable($tableName);
+			$configGenerator->generate();
+            
+            
 			$controllerGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateController');
 			$controllerGenerator->setModule($moduleName);
 			$controllerGenerator->setModel($modelName);
 			$controllerGenerator->setTable($tableName);
 			$controllerGenerator->generate();
-			/*
+			
 			$modelGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateModel');
 			$modelGenerator->setModule($moduleName);
 			$modelGenerator->setModel($modelName);
@@ -49,12 +58,13 @@ class ScaffToolController extends AbstractActionController
 			$viewGenerator->setModel($modelName);
 			$viewGenerator->setTable($tableName);
 			$viewGenerator->generate();
-			*/
+			
 			$formGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateForm');
 			$formGenerator->setModule($moduleName);
 			$formGenerator->setModel($modelName);
 			$formGenerator->setTable($tableName);
 			$formGenerator->generate();
+            
 			$this->hideLoader();
 			
 			//$controllerGenerator->setModel($modelName);
