@@ -59,17 +59,19 @@ class ScaffToolTable
 		$metadata = new Metadata($this->adapter);	
 		$table = $metadata->getTable($tableName);			
 		foreach ($table->getColumns() as $column) {
-			$structure[$column->getName()] = array('type' => $column->getDataType(), 'primary' => false);
+			$structure[$column->getName()] = array('type' => $column->getDataType(), 'primary' => false, 'foreign' => false);
     	}
 
 		foreach ($metadata->getConstraints($tableName) as $constraint) {
         	/** @var $constraint Zend\Db\Metadata\Object\ConstraintObject */
+            $constr_columns = $constraint->getColumns();
+            $c_column = $constr_columns[0];
 			if ($constraint->isPrimaryKey()) {
-				$constr_columns = $constraint->getColumns();
+				
 				if(sizeof($constr_columns) == 1)	
 				{	
-					$primary_column = $constr_columns[0];
-					$structure[$primary_column]['primary'] = true;
+					
+					$structure[$c_column]['primary'] = true;
 				}
 
 	        	if (!$constraint->hasColumns()) {
@@ -79,11 +81,12 @@ class ScaffToolTable
             
 	        //echo PHP_EOL.'            column: ' . implode(', ', $constraint->getColumns());
     	    if ($constraint->isForeignKey()) {
+                //$foreign_column = $constr_columns[0];
         	    $fkCols = array();
             	foreach ($constraint->getReferencedColumns() as $refColumn) {
-	                $fkCols[] = $constraint->getReferencedTableName() . '.' . $refColumn;
+	                $structure[$c_column]['foreign'] = array($constraint->getReferencedTableName(), $refColumn);
     	        }
-        	    echo PHP_EOL.' => ' . implode(', ', $fkCols);
+        	    //echo PHP_EOL.' => ' . implode(', ', $fkCols);
         	}
 	        //echo PHP_EOL;
 

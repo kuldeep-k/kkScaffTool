@@ -24,7 +24,7 @@ class GenerateView extends AbstractGenerateService
 		//die('Debug');
 		$base_path = $configs['BASE_PATH'];
 
-		$modulePath = $base_path.'/module/'.ucfirst($this->moduleName);	
+		$modulePath = $base_path.'/module/'.$this->uModuleName;	
 		if(!file_exists($modulePath))
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` not exists.');
@@ -33,9 +33,20 @@ class GenerateView extends AbstractGenerateService
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` is not writable.');
 		}
-
+        
+        if($this->isCamel($this->modelName))
+        {
+            $name = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $this->modelName));
+            $viewFolder = $modulePath.'/view/'.strtolower($this->moduleName).'/'.$name;
+        }
+        else
+        {
+            $viewFolder = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName); 
+        }
+        //echo $viewFolder;
+        //die;
 		// Add Listing index view
-		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/index.phtml';
+		$viewPath = $viewFolder.'/index.phtml';
 
 		if(!file_exists(dirname($viewPath)))
         {
@@ -58,7 +69,7 @@ class GenerateView extends AbstractGenerateService
 		file_put_contents($viewPath, $code);
 
         // Add Listing add view
-		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/add.phtml';
+		$viewPath = $viewFolder.'/add.phtml';
 		if(file_exists($viewPath))
         {
             throw new \Exception('View `'.$viewPath.'` already exists ');
@@ -71,7 +82,7 @@ class GenerateView extends AbstractGenerateService
 		file_put_contents($viewPath, $code);
 
         // Edit Listing add view
-		$viewPath = $modulePath.'/view/'.strtolower($this->moduleName).'/'.strtolower($this->modelName).'/edit.phtml';
+		$viewPath = $viewFolder.'/edit.phtml';
 		if(file_exists($viewPath))
         {
             throw new \Exception('View `'.$viewPath.'` already exists ');

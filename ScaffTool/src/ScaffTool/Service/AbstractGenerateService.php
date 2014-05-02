@@ -16,13 +16,23 @@ class AbstractGenerateService implements ServiceLocatorAwareInterface {
 
 	public function setModel($modelName)
 	{
-		$this->modelName = strtolower($modelName);
-		$this->uModelName = ucfirst($modelName);
+		$this->modelName = $modelName;
+        $this->lModelName = strtolower($modelName);
+        if(strtoupper($modelName[0]) == $modelName[0])
+        {   
+            $this->uModelName = $modelName;
+        }
+        else
+        { 
+		    $this->uModelName = ucfirst($modelName);
+        }
+        //echo $this->uModelName;
+        //die;    
 	}
 
 	public function setModule($moduleName)
 	{
-		$this->moduleName = strtolower($moduleName);
+		$this->moduleName = $moduleName;
 		$this->uModuleName = ucfirst($moduleName);
 	}
 
@@ -55,6 +65,23 @@ class AbstractGenerateService implements ServiceLocatorAwareInterface {
 	{
 		return ucwords(str_replace('_', ' ', $text));
 	}
+    
+    public function isCamel($name)
+    {
+        $upperChar = 0;
+        for($i=0;$i<strlen($name);$i++)
+        {
+            if(strtoupper($name[$i]) == $name[$i])
+            {
+                $upperChar++;
+            }
+        }        
+        if($upperChar >= 2)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 

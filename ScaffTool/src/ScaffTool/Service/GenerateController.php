@@ -10,7 +10,7 @@ class GenerateController extends AbstractGenerateService
 	{
 		$configs = $this->getServiceLocator()->get('config');
 		$base_path = $configs['BASE_PATH'];
-		$modulePath = $base_path.'/module/'.ucfirst($this->moduleName);	
+		$modulePath = $base_path.'/module/'.$this->uModuleName;	
 		if(!file_exists($modulePath))
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` not exists.');
@@ -20,8 +20,8 @@ class GenerateController extends AbstractGenerateService
 			throw new \Exception('Module Path `'.$modulePath.'` is not writable.');
 		}
 
-		$controllerName = ucfirst($this->modelName).'Controller';
-		$controllerPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Controller/'.$controllerName.'.php';
+		$controllerName = $this->uModelName.'Controller';
+		$controllerPath = $modulePath.'/src/'.$this->uModuleName.'/Controller/'.$controllerName.'.php';
 
 		if(!file_exists(dirname($controllerPath)))
         {
@@ -84,7 +84,7 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'{';
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(2)."\$form = new ".$this->uModelName."Form();";
+		$code .= $this->makeTab(2)."\$form = new ".$this->uModelName."Form(\$this->getServiceLocator()->get('Zend\Db\Adapter\Adapter'));";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."\$form->get('submit')->setValue('Add');";
 		$code .= $this->makeLine(1);
@@ -106,7 +106,7 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(4)."\$this->flashMessenger()->addMessage('Thank you for your comment!');";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(4)."return \$this->redirect()->toRoute('".strtolower($this->modelName)."');";
+		$code .= $this->makeTab(4)."return \$this->redirect()->toRoute('".$this->lModelName."');";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(3)."}";
 		$code .= $this->makeLine(1);
@@ -125,7 +125,7 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."if (!\$id) {";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."return \$this->redirect()->toRoute('".strtolower($this->modelName)."', array(";
+		$code .= $this->makeTab(3)."return \$this->redirect()->toRoute('".$this->lModelName."', array(";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(4)."'action' => 'add'";
 		$code .= $this->makeLine(1);
@@ -137,7 +137,7 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 
 
-		$code .= $this->makeTab(2)."\$form = new ".$this->uModelName."Form();";
+		$code .= $this->makeTab(2)."\$form = new ".$this->uModelName."Form(\$this->getServiceLocator()->get('Zend\Db\Adapter\Adapter'));";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."\$form->bind(\$".strtolower($this->modelName).");";
 		$code .= $this->makeLine(1);

@@ -25,7 +25,7 @@ class GenerateModel extends AbstractGenerateService
 		//die('Debug');
 		$base_path = $configs['BASE_PATH'];
 
-		$modulePath = $base_path.'/module/'.ucfirst($this->moduleName);	
+		$modulePath = $base_path.'/module/'.$this->uModuleName;	
 		if(!file_exists($modulePath))
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` not exists.');
@@ -36,8 +36,8 @@ class GenerateModel extends AbstractGenerateService
 		}
 
 		// Add Model
-		$modelName = ucfirst($this->modelName);
-		$modelPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Model/'.$modelName.'.php';
+		$modelName = $this->uModelName;
+		$modelPath = $modulePath.'/src/'.$this->uModuleName.'/Model/'.$modelName.'.php';
 
 		if(!file_exists(dirname($modelPath)))
         {
@@ -60,8 +60,8 @@ class GenerateModel extends AbstractGenerateService
 
 
 		// Add Model Table
-		$modelName = ucfirst($this->modelName).'Table';
-		$modelPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Model/'.$modelName.'.php';
+		$modelName = $this->uModelName.'Table';
+		$modelPath = $modulePath.'/src/'.$this->uModuleName.'/Model/'.$modelName.'.php';
 
 		if(!file_exists(dirname($modelPath)))
         {

@@ -33,13 +33,11 @@ class ScaffToolController extends AbstractActionController
             
 			$this->getServiceLocator()->get('ScaffTool\Model\ScaffToolTable')->verifyTable($tableName);
 
-            
             $configGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateConfig');
 			$configGenerator->setModule($moduleName);
 			$configGenerator->setModel($modelName);
 			$configGenerator->setTable($tableName);
 			$configGenerator->generate();
-            
             
 			$controllerGenerator = $this->getServiceLocator()->get('ScaffTool\Service\GenerateController');
 			$controllerGenerator->setModule($moduleName);

@@ -3,6 +3,7 @@
 namespace ScaffTool\Service;
 
 use ScaffTool\Service\AbstractGenerateService;
+use Zend\Config\Reader\Xml;
 
 class GenerateForm extends AbstractGenerateService
 {
@@ -10,6 +11,7 @@ class GenerateForm extends AbstractGenerateService
 	public $tableStructure;
 	public function generate()
 	{
+            
 		$configs = $this->getServiceLocator()->get('config');
 
 		$this->tableStructure = $this->getServiceLocator()->get('ScaffTool\Model\ScaffToolTable')->getTableStructure($this->tableName);
@@ -21,11 +23,10 @@ class GenerateForm extends AbstractGenerateService
 				$this->primaryKeyColumn = $fieldName;
 			}
 		}
-        //print_r($this->tableStructure);
-		//die('Debug');
-		$base_path = $configs['BASE_PATH'];
 
-		$modulePath = $base_path.'/module/'.ucfirst($this->moduleName);	
+        $base_path = $configs['BASE_PATH'];
+
+		$modulePath = $base_path.'/module/'.$this->uModuleName;	
 		if(!file_exists($modulePath))
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` not exists.');
@@ -34,10 +35,10 @@ class GenerateForm extends AbstractGenerateService
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` is not writable.');
 		}
-
+        
 		// Add Model
-		$formName = ucfirst($this->modelName);
-		$formPath = $modulePath.'/src/'.ucfirst($this->moduleName).'/Form/'.$formName.'Form.php';
+		$formName = $this->uModelName;
+		$formPath = $modulePath.'/src/'.$this->uModuleName.'/Form/'.$formName.'Form.php';
 
 		if(!file_exists(dirname($formPath)))
         {
@@ -53,7 +54,7 @@ class GenerateForm extends AbstractGenerateService
         }
 
 		$code = $this->getFormCode();
-		//echo $modelPath;
+		echo $formPath;
 		touch($formPath);
 
 		file_put_contents($formPath, $code);
@@ -62,6 +63,10 @@ class GenerateForm extends AbstractGenerateService
 
 	public function getFormCode()
 	{
+        $xml_settings = include_once(__DIR__.'/../../../config/generate.php');
+
+        $currentNode = $xml_settings[$this->uModuleName][$this->uModelName]['form']['widgets'];
+
 		$modelName = $this->uModelName;
 
 		$code = '<?php ';
@@ -79,6 +84,15 @@ class GenerateForm extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= 'use Zend\InputFilter\InputFilterInterface;';
 		$code .= $this->makeLine(1);
+		$code .= 'use Zend\Db\Adapter\AdapterInterface;';
+		$code .= $this->makeLine(1);
+		$code .= 'use Zend\Db\Adapter\Adapter;';
+		$code .= $this->makeLine(1);
+		$code .= 'use Zend\Db\Sql\Sql;';
+		$code .= $this->makeLine(1);
+		$code .= 'use Zend\Db\Sql\Select;';
+		$code .= $this->makeLine(1);
+
 		//$code .= 'use '.$this->moduleName.'\\Model\\'.$this->uModelName.';';
 		//$code .= $this->makeLine(1);
 		
@@ -91,7 +105,7 @@ class GenerateForm extends AbstractGenerateService
 		$code .= $this->makeTab(1)."protected \$inputFilter;";		
 		$code .= $this->makeLine(1);
 	
-		$code .= $this->makeTab(1)."public function __construct(\$name=null)";
+		$code .= $this->makeTab(1)."public function __construct(AdapterInterface \$dbAdapter)";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'{';
 		$code .= $this->makeLine(1);
@@ -113,35 +127,91 @@ class GenerateForm extends AbstractGenerateService
 		$code .= $this->makeTab(2)."));";
 		$code .= $this->makeLine(2);
 
-
 		foreach($this->tableStructure as $fieldName => $fieldStructure)
 		{
 			if($fieldName != $this->primaryKeyColumn)
 			{
 				//$code .= $this->makeTab(2)."'".$fieldName."' => \$".$this->modelName."->".$fieldName.",";		
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(2)."\$this->add(array(";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(3)."'name' => '".$fieldName."',";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(3)."'attributes' => array(";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(4)."'type'  => 'text',";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(3)."),";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(3)."'options' => array(";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(4)."'label'  => '".$this->convertToLabel($fieldName)."',";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(3)."),";
-				$code .= $this->makeLine(1);
-				$code .= $this->makeTab(2)."));";
-				$code .= $this->makeLine(2);
+                if($fieldName['foreign'] != false )
+                {
+                    //print_r($fieldStructure['foreign']);die;
+                }
+
+                if(array_key_exists($fieldName, $currentNode))
+                {
+                    if($currentNode[$fieldName]['type'] == 'select')
+                    {
+                        //$kcolumn = $currentNode[$fieldName]['key-column'];
+                        //$vcolumn = $currentNode[$fieldName]['value-column'];
+
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$sql = new Sql(\$dbAdapter);";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$select = \$sql->select('".$currentNode[$fieldName]['table']."');";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$select->columns(array('".$currentNode[$fieldName]['key-column']."', '".$currentNode[$fieldName]['value-column']."'));";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$statement = \$sql->prepareStatementForSqlObject(\$select);";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$result = \$statement->execute();";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$options = array();";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."foreach(\$result as \$row)";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."{";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."\$options[\$row['".$currentNode[$fieldName]['key-column']."']] = \$row['".$currentNode[$fieldName]['value-column']."'];";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."}";
+
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."\$this->add(array(";
+                        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."'type' => 'Zend\\Form\\Element\\Select',";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."'name' => '".$fieldName."',";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."'attributes' => array(";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(4)."'options'  => \$options,";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."),";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."'options' => array(";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(4)."'label'  => '".$this->convertToLabel($fieldName)."',";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(3)."),";
+				        $code .= $this->makeLine(1);
+				        $code .= $this->makeTab(2)."));";
+				        $code .= $this->makeLine(2);
+                    }
+                }
+                else
+                {
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(2)."\$this->add(array(";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(3)."'name' => '".$fieldName."',";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(3)."'attributes' => array(";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(4)."'type'  => 'text',";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(3)."),";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(3)."'options' => array(";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(4)."'label'  => '".$this->convertToLabel($fieldName)."',";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(3)."),";
+				    $code .= $this->makeLine(1);
+				    $code .= $this->makeTab(2)."));";
+				    $code .= $this->makeLine(2);
+                }
 			}
 		}
-
-
 
 		$code .= $this->makeTab(2)."\$this->add(array(";
 		$code .= $this->makeLine(1);

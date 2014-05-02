@@ -10,7 +10,7 @@ class GenerateConfig extends AbstractGenerateService
 	{
 		$configs = $this->getServiceLocator()->get('config');
 		$base_path = $configs['BASE_PATH'];
-		$modulePath = $base_path.'/module/'.ucfirst($this->moduleName);	
+		$modulePath = $base_path.'/module/'.$this->uModuleName;	
 		if(!file_exists($modulePath))
 		{
 			throw new \Exception('Module Path `'.$modulePath.'` not exists.');
@@ -38,7 +38,7 @@ class GenerateConfig extends AbstractGenerateService
         }
 
         $template = $this->getTemplate();
-        $template = str_replace(array('--CMODULE--', '--CMODEL--', '--MODEL--'), array($this->uModuleName, $this->uModelName, $this->modelName), $template);
+        $template = str_replace(array('--CMODULE--', '--CMODEL--', '--MODEL--'), array($this->uModuleName, $this->uModelName, $this->lModelName), $template);
 		//$code = $this->getCode();
 
 		touch($configPath);
