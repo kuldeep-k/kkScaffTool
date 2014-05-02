@@ -76,14 +76,15 @@ class ScaffToolTable
     	        	continue;
         		}
 			}
-	        /*echo '            column: ' . implode(', ', $constraint->getColumns());
+            
+	        //echo PHP_EOL.'            column: ' . implode(', ', $constraint->getColumns());
     	    if ($constraint->isForeignKey()) {
         	    $fkCols = array();
             	foreach ($constraint->getReferencedColumns() as $refColumn) {
 	                $fkCols[] = $constraint->getReferencedTableName() . '.' . $refColumn;
     	        }
-        	    echo ' => ' . implode(', ', $fkCols);
-        	}*/
+        	    echo PHP_EOL.' => ' . implode(', ', $fkCols);
+        	}
 	        //echo PHP_EOL;
 
     	}

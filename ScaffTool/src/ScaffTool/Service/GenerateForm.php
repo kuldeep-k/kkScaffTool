@@ -21,6 +21,7 @@ class GenerateForm extends AbstractGenerateService
 				$this->primaryKeyColumn = $fieldName;
 			}
 		}
+        //print_r($this->tableStructure);
 		//die('Debug');
 		$base_path = $configs['BASE_PATH'];
 

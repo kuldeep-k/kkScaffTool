@@ -176,6 +176,23 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(1).'{';
 		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."\$id = (int) \$this->params()->fromRoute('id', 0);";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."if (!\$id) {";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(3)."return \$this->redirect()->toRoute('".strtolower($this->modelName)."');";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."}";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."\$id = (int) \$this->params()->fromRoute('id', 0);";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."\$this->getTable()->delete".$this->uModelName."(\$id);";
+		$code .= $this->makeLine(1);
+		$code .= $this->makeTab(2)."return \$this->redirect()->toRoute('".strtolower($this->modelName)."');";
+		$code .= $this->makeLine(1);
+
+
+
 		$code .= $this->makeTab(1).'}';
 		$code .= $this->makeLine(2);
 
@@ -187,7 +204,7 @@ class GenerateController extends AbstractGenerateService
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(3)."\$sm = \$this->getServiceLocator();";
 		$code .= $this->makeLine(1);
-		$code .= $this->makeTab(3)."\$this->".$this->modelName."Table = \$sm->get('".$this->moduleName."\\Model\\".$this->modelName."Table');";
+		$code .= $this->makeTab(3)."\$this->".$this->modelName."Table = \$sm->get('".$this->moduleName."\\Model\\".$this->uModelName."Table');";
 		$code .= $this->makeLine(1);
 		$code .= $this->makeTab(2)."}";
 		$code .= $this->makeLine(1);
