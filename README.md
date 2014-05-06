@@ -1,7 +1,7 @@
 kkScaffTool
 ===========
 
-Version 0.1-pre-alpha.
+Version 0.2.
 
 kkScafftool is simple scaffolding tool for Zend Framework 2 
 
