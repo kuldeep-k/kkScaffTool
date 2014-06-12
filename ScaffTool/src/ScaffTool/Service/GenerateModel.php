@@ -41,7 +41,8 @@ class GenerateModel extends AbstractGenerateService
 
 		if(!file_exists(dirname($modelPath)))
         {
-            throw new \Exception('Model `'.dirname($modelPath).'` not exists ');
+            //throw new \Exception('Model `'.dirname($modelPath).'` not exists ');
+			mkdir(dirname($modelPath));
         }
         if(!is_writable(dirname($modelPath)))
         {
